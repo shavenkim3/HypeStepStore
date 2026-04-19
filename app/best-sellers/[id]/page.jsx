@@ -6,186 +6,106 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
 
-const products = [
+const bestSellerProducts = [
   {
     id: 1,
-    brand: "Nike",
+    brand: "Jordan",
     name: "Air Jordan 1 Low",
-    price: 133,
-    category: "Lifestyle",
-    gender: "Women",
-    color: "Pink",
-    isNew: true,
-    colors: 1,
+    price: 115,
+    category: "Basketball",
+    gender: "Men",
+    color: "Red",
+    isBestSeller: true,
+    colors: 4,
     description:
-      "A timeless classic with clean lines, premium comfort, and everyday versatility.",
+      "A best-selling Jordan silhouette with iconic style, everyday comfort, and versatile wearability for both on-court and off-court looks.",
     gallery: [
-      { src: "/NewArrivals/JordanPink(1).png", alt: "" },
-      { src: "/NewArrivals/JordanPink(2).png", alt: "" },
-      { src: "/NewArrivals/JordanPink(3).png", alt: "" },
-      { src: "/NewArrivals/JordanPink(4).png", alt: "" },
+      { src: "/images/jordan1(1).png", alt: "Air Jordan 1 Low side view" },
+      { src: "/images/jordan1(2).png", alt: "Air Jordan 1 Low front view" },
+      { src: "/images/jordan1(3).png", alt: "Air Jordan 1 Low back view" },
+      { src: "/images/jordan1(4).png", alt: "Air Jordan 1 Low top view" },
     ],
-    sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
+    sizes: ["39", "40", "41", "42", "43", "44", "45"],
   },
   {
     id: 2,
     brand: "Nike",
-    name: "Nike Dunk Low WNBA 30th",
-    price: 152,
+    name: "Nike Air Force 1 '07",
+    price: 144,
     category: "Lifestyle",
-    gender: "Unisex",
-    color: "Red",
-    isNew: true,
-    colors: 2,
-    description:
-      "An iconic streetwear staple with retro football roots and effortless style.",
-    gallery: [
-      { src: "/NewArrivals/WNBA(1).png", alt: "" },
-      { src: "/NewArrivals/WNBA(2).png", alt: "" },
-      { src: "/NewArrivals/WNBA(3).png", alt: "" },
-      { src: "/NewArrivals/WNBA(4).png", alt: "" },
-    ],
-    sizes: ["38", "39", "40", "41", "42", "43", "44"],
-  },
-  {
-    id: 3,
-    brand: "Nike",
-    name: "Nike SB Dunk Low Pro",
-    price: 133,
-    category: "Skateboarding",
     gender: "Men",
-    color: "Mineral Slate/Particle Rose/Silt Red/Dark Raisin",
-    isNew: true,
+    color: "White",
+    isBestSeller: true,
     colors: 3,
     description:
-      "Low-cut comfort and legendary Jordan design for on-court and off-court wear.",
+      "One of the most popular sneakers of all time, combining timeless design, premium comfort, and effortless styling.",
     gallery: [
-      { src: "/NewArrivals/SB1.png", alt: "Air Jordan 1 Low side view" },
-      { src: "/NewArrivals/SB2.png", alt: "Air Jordan 1 Low front view" },
-      { src: "/NewArrivals/SB3.png", alt: "Air Jordan 1 Low back view" },
-      { src: "/NewArrivals/SB4.png", alt: "Air Jordan 1 Low top view" },
-    ],
-    sizes: ["39", "40", "41", "42", "43", "44", "45"],
-  },
-  {
-    id: 4,
-    brand: "Puma",
-    name: "ST Miler Rose",
-    price: 65,
-    category: "Lifestyle",
-    gender: "Women",
-    color: "Pink",
-    isNew: true,
-    colors: 1,
-    description:
-      "Bold, clean, and easy to style. A modern favorite inspired by basketball heritage.",
-    gallery: [
-      { src: "/NewArrivals/Miler1.png", alt: "Nike Dunk Low Retro side view" },
-      { src: "/NewArrivals/Miler2.png", alt: "Nike Dunk Low Retro front view" },
-      { src: "/NewArrivals/Miler3.png", alt: "Nike Dunk Low Retro back view" },
-      { src: "/NewArrivals/Miler4.png", alt: "Nike Dunk Low Retro top view" },
-    ],
-    sizes: ["36", "37", "38", "39", "40", "41"],
-  },
-  {
-    id: 5,
-    brand: "Puma",
-    name: "FUTURE 7 Match FG/AG",
-    price: 103,
-    category: "Football",
-    gender: "Men",
-    color: "White/Pink",
-    isNew: true,
-    colors: 1,
-    description:
-      "Responsive cushioning and lightweight energy return for everyday runs.",
-    gallery: [
-      { src: "/NewArrivals/Match1.png", alt: "Puma Velocity Nitro side view" },
-      { src: "/NewArrivals/Match2.png", alt: "Puma Velocity Nitro front view" },
-      { src: "/NewArrivals/Match3.png", alt: "Puma Velocity Nitro back view" },
-      { src: "/NewArrivals/Match4.png", alt: "Puma Velocity Nitro top view" },
-    ],
-    sizes: ["39", "40", "41", "42", "43", "44"],
-  },
-  {
-    id: 6,
-    brand: "Adidas",
-    name: "MEGARIDE AG Shoes",
-    price: 218,
-    category: "Lifestyle",
-    gender: "Women",
-    color: "Real Magenta / Pulse Magenta / Core Black",
-    isNew: true,
-    colors: 3,
-    description:
-      "Chunky futuristic styling paired with premium comfort and standout proportions.",
-    gallery: [
-      { src: "/NewArrivals/MEGARIDE1.png", alt: "New Balance 9060 side view" },
-      { src: "/NewArrivals/MEGARIDE2.png", alt: "New Balance 9060 front view" },
-      { src: "/NewArrivals/MEGARIDE3.png", alt: "New Balance 9060 back view" },
-      { src: "/NewArrivals/MEGARIDE4.png", alt: "New Balance 9060 top view" },
+      { src: "/images/airforce1(1).png", alt: "Nike Air Force 1 '07 side view" },
+      { src: "/images/airforce1(2).png", alt: "Nike Air Force 1 '07 front view" },
+      { src: "/images/airforce1(3).png", alt: "Nike Air Force 1 '07 back view" },
+      { src: "/images/airforce1(4).png", alt: "Nike Air Force 1 '07 top view" },
     ],
     sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
   },
   {
-    id: 7,
-    brand: "Asics",
-    name: "Asics GEL-Kayano 14",
-    price: 150,
-    category: "Running",
-    gender: "Women",
-    color: "Grey",
-    isNew: true,
-    colors: 3,
-    description:
-      "Performance-inspired cushioning meets a sleek retro runner aesthetic.",
-    gallery: [
-      { src: "/images/airforce1.png", alt: "Asics GEL-Kayano 14 side view" },
-      { src: "/images/airforce1.png", alt: "Asics GEL-Kayano 14 front view" },
-      { src: "/images/airforce1.png", alt: "Asics GEL-Kayano 14 back view" },
-      { src: "/images/airforce1.png", alt: "Asics GEL-Kayano 14 top view" },
-    ],
-    sizes: ["36", "37", "38", "39", "40", "41", "42"],
-  },
-  {
-    id: 8,
-    brand: "Vans",
-    name: "Vans Knu Skool",
-    price: 89,
-    category: "Skateboarding",
-    gender: "Kids",
-    color: "Blue",
-    isNew: true,
-    colors: 4,
-    description:
-      "Puffy 90s-inspired design with classic Vans attitude and daily comfort.",
-    gallery: [
-      { src: "/images/jordan1.png", alt: "Vans Knu Skool side view" },
-      { src: "/images/jordan1.png", alt: "Vans Knu Skool front view" },
-      { src: "/images/jordan1.png", alt: "Vans Knu Skool back view" },
-      { src: "/images/jordan1.png", alt: "Vans Knu Skool top view" },
-    ],
-    sizes: ["30", "31", "32", "33", "34", "35"],
-  },
-  {
-    id: 9,
+    id: 3,
     brand: "Adidas",
-    name: "Adidas Adizero SL",
-    price: 135,
-    category: "Running",
-    gender: "Men",
-    color: "Green",
-    isNew: true,
+    name: "Adidas Samba OG",
+    price: 105,
+    category: "Lifestyle",
+    gender: "Unisex",
+    color: "White",
+    isBestSeller: true,
     colors: 2,
     description:
-      "Fast, light, and versatile running shoes built for speed and comfort.",
+      "A true best seller with retro football DNA, sleek proportions, and streetwear appeal that never goes out of style.",
     gallery: [
-      { src: "/images/samba.png", alt: "Adidas Adizero SL side view" },
-      { src: "/images/samba.png", alt: "Adidas Adizero SL front view" },
-      { src: "/images/samba.png", alt: "Adidas Adizero SL back view" },
-      { src: "/images/samba.png", alt: "Adidas Adizero SL top view" },
+      { src: "/images/Samba(1).png", alt: "Adidas Samba OG side view" },
+      { src: "/images/Samba(2).png", alt: "Adidas Samba OG front view" },
+      { src: "/images/Samba(3).png", alt: "Adidas Samba OG back view" },
+      { src: "/images/Samba(4).png", alt: "Adidas Samba OG top view" },
     ],
-    sizes: ["39", "40", "41", "42", "43", "44", "45"],
+    sizes: ["38", "39", "40", "41", "42", "43", "44"],
+  },
+  {
+    id: 4,
+    brand: "Nike",
+    name: "Luka 77 “Chicago” PF",
+    price: 116,
+    category: "Basketball",
+    gender: "Men",
+    color: "White",
+    isBestSeller: true,
+    colors: 1,
+    description:
+      "A standout best seller featuring bold proportions, premium comfort, and modern styling for everyday rotation.",
+    gallery: [
+      { src: "/images/Luka(1).png", alt:  ""},
+      { src: "/images/Luka(2).png", alt: "" },
+      { src: "/images/Luka(3).png", alt: "" },
+      { src: "/images/Luka(4).png", alt: "" },
+    ],
+    sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
+  },
+{
+    id: 5,
+    brand: "Puma",
+    name: "Puma Speedcat OG",
+    price: 119,
+    category: "Lifestyle",
+    gender: "Men",
+    color: "Brown",
+    isBestSeller: true,
+    colors: 1,
+    description:
+      "A standout best seller featuring bold proportions, premium comfort, and modern styling for everyday rotation.",
+    gallery: [
+      { src: "/images/Speedcat(1).png", alt:  ""},
+      { src: "/images/Speedcat(2).png", alt: "" },
+      { src: "/images/Speedcat(3).png", alt: "" },
+      { src: "/images/Speedcat(4).png", alt: "" },
+    ],
+    sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
   },
 ];
 
@@ -200,7 +120,7 @@ function ProductGallery({ product }) {
 
   React.useEffect(() => {
     setSelectedImage(0);
-  }, [product.id]);
+  }, [product?.id]);
 
   const currentImage = gallery[selectedImage] || gallery[0];
 
@@ -237,9 +157,9 @@ function ProductGallery({ product }) {
 
       <div className="order-1 lg:order-2 overflow-hidden rounded-[32px] border border-black/5 bg-white p-4 shadow-sm sm:p-5">
         <div className="relative flex items-center justify-center rounded-[28px] bg-[#eef2f8] px-6 py-8 sm:px-8 sm:py-10 lg:min-h-[540px] lg:px-10 lg:py-12 xl:min-h-[600px]">
-          {product.isNew && (
+          {product.isBestSeller && (
             <span className="absolute left-5 top-5 rounded-full bg-[#111] px-3 py-1 text-xs font-semibold text-white">
-              New
+              Best Seller
             </span>
           )}
 
@@ -254,16 +174,16 @@ function ProductGallery({ product }) {
   );
 }
 
-export default function ProductDetailPage({ params }) {
+export default function BestSellerDetailPage({ params }) {
   const { id } = React.use(params);
   const productId = Number(id);
-  const product = products.find((item) => item.id === productId);
+  const product = bestSellerProducts.find((item) => item.id === productId);
 
   const [selectedSize, setSelectedSize] = useState("");
 
-React.useEffect(() => {
-  setSelectedSize("");
-}, [productId]);
+  React.useEffect(() => {
+    setSelectedSize("");
+  }, [productId]);
 
   const handleAddToCart = () => {
     if (!product || !selectedSize) {
@@ -311,10 +231,10 @@ React.useEffect(() => {
               The product you are looking for does not exist.
             </p>
             <Link
-              href="/new"
+              href="/"
               className="mt-6 inline-flex rounded-full bg-[#111] px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-600"
             >
-              Back to New Arrivals
+              Back to Home
             </Link>
           </div>
         </section>
@@ -334,9 +254,7 @@ React.useEffect(() => {
               Home
             </Link>
             <span className="mx-2 text-gray-300">/</span>
-            <Link href="/new" className="transition hover:text-indigo-600">
-              New Arrivals
-            </Link>
+            <span className="text-[#111]">Best Sellers</span>
             <span className="mx-2 text-gray-300">/</span>
             <span className="text-[#111]">{product.name}</span>
           </div>
@@ -350,9 +268,9 @@ React.useEffect(() => {
                   {product.brand}
                 </p>
 
-                {product.isNew && (
+                {product.isBestSeller && (
                   <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
-                    New Arrival
+                    Best Seller
                   </span>
                 )}
               </div>

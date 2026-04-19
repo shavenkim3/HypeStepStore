@@ -33,10 +33,7 @@ export default function FollowPage() {
                 Home <span className="mx-2 text-gray-300">/</span> Follow
               </p>
 
-              <div className="mt-4 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                  <Heart size={24} />
-                </div>
+              <div className="mt-4">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight text-[#111] sm:text-4xl lg:text-5xl">
                     Follow
@@ -73,16 +70,16 @@ export default function FollowPage() {
                       <Trash2 size={18} />
                     </button>
 
-                    <Link
-                      href={`/product/${item.id}`}
-                      className="flex min-h-[280px] items-center justify-center rounded-[24px] bg-[#eef2f8] p-4"
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="h-[200px] w-full max-w-[260px] object-contain transition duration-500 hover:scale-105"
-                      />
-                    </Link>
+<Link
+  href={`/product/${item.id}`}
+  className="flex min-h-[280px] items-center justify-center rounded-[24px] bg-[#eef2f8] p-2"
+>
+  <img
+    src={item.image}
+    alt={item.name}
+    className="h-[270px] w-full max-w-[380px] object-contain transition duration-500 hover:scale-110"
+  />
+</Link>
                   </div>
 
                   <div className="p-5 sm:p-6">

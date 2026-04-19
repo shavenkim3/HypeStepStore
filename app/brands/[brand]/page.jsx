@@ -1,152 +1,59 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import * as React from "react";
+import Link from "next/link";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import FilterPanel from "../components/new/FilterPanel";
-import ProductCard from "../components/new/ProductCard";
-import MobileFilterDrawer from "../components/new/MobileFilterDrawer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import FilterPanel from "../../components/new/FilterPanel";
+import MobileFilterDrawer from "../../components/new/MobileFilterDrawer";
+import BrandProductCard from "../../components/brands/BrandProductCard";
+import {
+  allProducts,
+  getBrandNameFromSlug,
+  slugifyBrand,
+} from "../../data/products";
 
-const products = [
-  {
-    id: 1,
-    brand: "Nike",
-    name: "Air Jordan 1 Low",
-    price: 133,
-    image: "/NewArrivals/JordanPink(1).png",
-    category: "Lifestyle",
-    gender: "Women",
-    color: "Pink",
-    isNew: true,
-    colors: 1,
-  },
-  {
-    id: 2,
-    brand: "Nike",
-    name: "Nike Dunk Low WNBA 30th",
-    price: 152,
-    image: "/NewArrivals/WNBA(1).png",
-    category: "Lifestyle",
-    gender: "Unisex",
-    color: "White",
-    isNew: true,
-    colors: 2,
-  },
-  {
-    id: 3,
-    brand: "Nike",
-    name: "Nike SB Dunk Low Pro",
-    price: 133,
-    image: "/NewArrivals/SB1.png",
-    category: "Skateboarding",
-    gender: "Men",
-    color: "Red",
-    isNew: true,
-    colors: 4,
-  },
-  {
-    id: 4,
-    brand: "Puma",
-    name: "ST Miler Rose",
-    price: 65,
-    image: "/NewArrivals/Miler1.png",
-    category: "Lifestyle",
-    gender: "Women",
-    color: "Pink",
-    isNew: true,
-    colors: 5,
-  },
-  {
-    id: 5,
-    brand: "Puma",
-    name: "FUTURE 7 Match FG/AG",
-    price: 103,
-    image: "/NewArrivals/Match1.png",
-    category: "Football",
-    gender: "Men",
-    color: "White/Pink",
-    isNew: true,
-    colors: 2,
-  },
-  {
-    id: 6,
-    brand: "Adidas",
-    name: "MEGARIDE AG Shoes",
-    price: 218,
-    image: "/NewArrivals/MEGARIDE1.png",
-    category: "Lifestyle",
-    gender: "Women",
-    color: "Real Magenta / Pulse Magenta / Core Black",
-    isNew: true,
-    colors: 3,
-  },
-  {
-    id: 7,
-    brand: "Asics",
-    name: "Asics GEL-Kayano 14",
-    price: 150,
-    image: "/images/airforce1.png",
-    category: "Running",
-    gender: "Women",
-    color: "Grey",
-    isNew: true,
-    colors: 3,
-  },
-  {
-    id: 8,
-    brand: "Vans",
-    name: "Vans Knu Skool",
-    price: 89,
-    image: "/images/jordan1.png",
-    category: "Skateboarding",
-    gender: "Kids",
-    color: "Blue",
-    isNew: true,
-    colors: 4,
-  },
-  {
-    id: 9,
-    brand: "Adidas",
-    name: "Adidas Adizero SL",
-    price: 135,
-    image: "/images/samba.png",
-    category: "Running",
-    gender: "Men",
-    color: "Green",
-    isNew: true,
-    colors: 2,
-  },
-];
+const PRICE_MIN = 0;
+const PRICE_MAX = 300;
 
-export default function NewPage() {
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+export default function BrandPage({ params }) {
+  const { brand } = React.use(params);
+  const brandName = getBrandNameFromSlug(brand);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedGenders, setSelectedGenders] = React.useState([]);
+  const [selectedBrands, setSelectedBrands] = React.useState([]);
+  const [selectedColors, setSelectedColors] = React.useState([]);
+  const [selectedShoeTypes, setSelectedShoeTypes] = React.useState([]);
+  const [minPrice, setMinPrice] = React.useState(PRICE_MIN);
+  const [maxPrice, setMaxPrice] = React.useState(PRICE_MAX);
+  const [sortBy, setSortBy] = React.useState("newest");
 
-  const [selectedGenders, setSelectedGenders] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState([]);
-  const [selectedColors, setSelectedColors] = useState([]);
-  const [selectedShoeTypes, setSelectedShoeTypes] = useState([]);
-
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(300);
-
-  const [sortBy, setSortBy] = useState("newest");
+  React.useEffect(() => {
+    if (brandName) {
+      setSelectedBrands([brandName]);
+    }
+  }, [brandName]);
 
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedGenders([]);
-    setSelectedBrands([]);
+    setSelectedBrands(brandName ? [brandName] : []);
     setSelectedColors([]);
     setSelectedShoeTypes([]);
-    setMinPrice(0);
-    setMaxPrice(300);
+    setMinPrice(PRICE_MIN);
+    setMaxPrice(PRICE_MAX);
     setSortBy("newest");
   };
 
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
+  const brandProducts = React.useMemo(() => {
+    return allProducts.filter((product) => product.brand === brandName);
+  }, [brandName]);
+
+  const filteredProducts = React.useMemo(() => {
+    let result = [...brandProducts];
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
     if (normalizedSearch) {
@@ -203,6 +110,7 @@ export default function NewPage() {
 
     return result;
   }, [
+    brandProducts,
     searchTerm,
     selectedGenders,
     selectedBrands,
@@ -213,23 +121,73 @@ export default function NewPage() {
     sortBy,
   ]);
 
+  const handleAddToCart = (product) => {
+    const defaultSize = product.sizes?.[0] || "";
+
+    const cartItem = {
+      cartId: `${product.id}-${defaultSize || "default"}`,
+      id: product.id,
+      brand: product.brand,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+      color: product.color,
+      size: defaultSize,
+      quantity: 1,
+    };
+
+    const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
+
+    const existingIndex = existingCart.findIndex(
+      (item) => item.id === cartItem.id && item.size === cartItem.size
+    );
+
+    if (existingIndex !== -1) {
+      existingCart[existingIndex].quantity += 1;
+    } else {
+      existingCart.push(cartItem);
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(existingCart));
+    window.dispatchEvent(new Event("cartUpdated"));
+  };
+
+  if (!brandName) {
+    return (
+      <main className="min-h-screen bg-[#f6f7fb] text-[#111]">
+        <Navbar />
+        <section className="px-4 py-12 sm:px-6 lg:px-10">
+          <div className="mx-auto max-w-[1200px] rounded-[32px] border border-black/5 bg-white p-8 text-center shadow-sm">
+            <h1 className="text-3xl font-bold">Brand not found</h1>
+            <p className="mt-3 text-gray-600">This brand does not exist.</p>
+            <Link
+              href="/"
+              className="mt-6 inline-flex rounded-full bg-[#111] px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-600"
+            >
+              Back to Home
+            </Link>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#f6f7fb] text-[#111]">
-      <Navbar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
+      <Navbar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-      <section className="w-full px-4 pt-6 pb-10 sm:px-6 lg:px-10 lg:pt-8 lg:pb-12">
+      <section className="w-full px-4 pb-10 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-8">
         <div className="mx-auto max-w-[1500px]">
           <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm text-gray-500">
-                Home <span className="mx-2 text-gray-300">/</span> New Arrivals
+                Home <span className="mx-2 text-gray-300">/</span> {brandName}
               </p>
 
               <h1 className="mt-4 text-3xl font-bold tracking-tight text-[#111] sm:text-4xl lg:text-5xl">
-                New Arrivals
+                {brandName}
               </h1>
             </div>
 
@@ -264,6 +222,7 @@ export default function NewPage() {
                   <option value="price-high-low">Price: High to Low</option>
                   <option value="brand-a-z">Brand: A-Z</option>
                 </select>
+
                 <ChevronDown
                   size={16}
                   className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
@@ -295,7 +254,12 @@ export default function NewPage() {
               {filteredProducts.length > 0 ? (
                 <div className="grid gap-6 sm:grid-cols-2 2xl:grid-cols-3">
                   {filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <BrandProductCard
+                      key={product.id}
+                      product={product}
+                      brandSlug={slugifyBrand(brandName)}
+                      onAddToCart={handleAddToCart}
+                    />
                   ))}
                 </div>
               ) : (
