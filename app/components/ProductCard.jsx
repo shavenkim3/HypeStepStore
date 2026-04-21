@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, Star, ShoppingBag } from "lucide-react";
 
-export default function ProductCard({ product, onAddToCart }) {
+export default function ProductCard({ product }) {
   const [liked, setLiked] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (!product?.id) return;
@@ -39,6 +41,7 @@ export default function ProductCard({ product, onAddToCart }) {
       rating: product.rating,
       reviews: product.reviews,
       isNew: product.isNew,
+      isBestSeller: product.isBestSeller,
     };
 
     const existingItems = JSON.parse(
@@ -58,6 +61,58 @@ export default function ProductCard({ product, onAddToCart }) {
     localStorage.setItem("followItems", JSON.stringify(updatedItems));
     window.dispatchEvent(new Event("followUpdated"));
     setLiked(false);
+  };
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!product?.id) return;
+
+    const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
+    const existingIndex = existingCart.findIndex(
+      (item) => item.id === product.id && !item.size
+    );
+
+    let updatedCart = [];
+
+    if (existingIndex !== -1) {
+      updatedCart = existingCart.map((item) =>
+        item.id === product.id && !item.size
+          ? {
+              ...item,
+              quantity: (item.quantity || 1) + 1,
+              source: "best-sellers",
+              routePath: `/best-sellers/${product.id}`,
+            }
+          : item
+      );
+    } else {
+      const cartItem = {
+        id: product.id,
+        brand: product.brand,
+        name: product.name,
+        price:
+          typeof product.price === "number"
+            ? product.price
+            : Number(String(product.price).replace(/[^0-9.]/g, "")) || 0,
+        image: product.image,
+        category: product.category || "Sneakers",
+        color: product.color || "",
+        colors: product.colors || "",
+        rating: product.rating ?? "4.8",
+        reviews: product.reviews ?? "120",
+        quantity: 1,
+        source: "best-sellers",
+        routePath: `/best-sellers/${product.id}`,
+      };
+
+      updatedCart = [...existingCart, cartItem];
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event("cartUpdated"));
+    router.push("/cart");
   };
 
   return (
@@ -150,10 +205,7 @@ export default function ProductCard({ product, onAddToCart }) {
 
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddToCart?.(product);
-            }}
+            onClick={handleAddToCart}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[#111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-600 sm:text-base"
           >
             <ShoppingBag size={18} />

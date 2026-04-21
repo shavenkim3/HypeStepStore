@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
@@ -255,15 +256,49 @@ function ProductGallery({ product }) {
 }
 
 export default function ProductDetailPage({ params }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const { id } = React.use(params);
   const productId = Number(id);
   const product = products.find((item) => item.id === productId);
 
+  const initialSizeFromQuery = searchParams.get("size") || "";
+  const fromCart = searchParams.get("from") === "cart";
+
   const [selectedSize, setSelectedSize] = useState("");
 
-React.useEffect(() => {
-  setSelectedSize("");
-}, [productId]);
+  React.useEffect(() => {
+    if (product?.sizes?.includes(initialSizeFromQuery)) {
+      setSelectedSize(initialSizeFromQuery);
+    } else {
+      setSelectedSize("");
+    }
+  }, [productId, initialSizeFromQuery, product]);
+
+  const createCartItem = () => {
+    if (!product || !selectedSize) return null;
+
+    return {
+      cartId: `${product.id}-${selectedSize}`,
+      id: product.id,
+      brand: product.brand,
+      name: product.name,
+      price:
+        typeof product.price === "number"
+          ? product.price
+          : Number(String(product.price).replace(/[^0-9.]/g, "")) || 0,
+      image: product.gallery?.[0]?.src || "",
+      category: product.category,
+      color: product.color,
+      colors: product.colors,
+      gender: product.gender,
+      size: selectedSize,
+      quantity: 1,
+      source: "product",
+      routePath: `/product/${product.id}`,
+    };
+  };
 
   const handleAddToCart = () => {
     if (!product || !selectedSize) {
@@ -271,33 +306,54 @@ React.useEffect(() => {
       return;
     }
 
-    const cartItem = {
-      cartId: `${product.id}-${selectedSize}`,
-      id: product.id,
-      brand: product.brand,
-      name: product.name,
-      price: product.price,
-      image: product.gallery?.[0]?.src || "",
-      category: product.category,
-      color: product.color,
-      size: selectedSize,
-      quantity: 1,
-    };
-
+    const cartItem = createCartItem();
     const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
 
     const existingIndex = existingCart.findIndex(
       (item) => item.id === cartItem.id && item.size === cartItem.size
     );
 
+    let updatedCart = [...existingCart];
+
     if (existingIndex !== -1) {
-      existingCart[existingIndex].quantity += 1;
+      updatedCart[existingIndex] = {
+        ...updatedCart[existingIndex],
+        quantity: (updatedCart[existingIndex].quantity || 1) + 1,
+        source: "product",
+        routePath: `/product/${product.id}`,
+      };
     } else {
-      existingCart.push(cartItem);
+      updatedCart.push(cartItem);
     }
 
-    localStorage.setItem("cartItems", JSON.stringify(existingCart));
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
     window.dispatchEvent(new Event("cartUpdated"));
+    router.push("/cart");
+  };
+
+  const handleBuyNow = () => {
+    if (!product || !selectedSize) {
+      alert("Please select a size first");
+      return;
+    }
+
+    const checkoutItem = {
+      ...createCartItem(),
+      source: "product",
+      routePath: `/product/${product.id}`,
+    };
+
+    localStorage.setItem("checkoutItems", JSON.stringify([checkoutItem]));
+    router.push("/checkout");
+  };
+
+  const handleBackLink = () => {
+    if (fromCart) {
+      router.push("/cart");
+      return;
+    }
+
+    router.push("/new");
   };
 
   if (!product) {
@@ -334,9 +390,15 @@ React.useEffect(() => {
               Home
             </Link>
             <span className="mx-2 text-gray-300">/</span>
-            <Link href="/new" className="transition hover:text-indigo-600">
-              New Arrivals
-            </Link>
+
+            <button
+              type="button"
+              onClick={handleBackLink}
+              className="transition hover:text-indigo-600"
+            >
+              {fromCart ? "Cart" : "New Arrivals"}
+            </button>
+
             <span className="mx-2 text-gray-300">/</span>
             <span className="text-[#111]">{product.name}</span>
           </div>
@@ -377,7 +439,9 @@ React.useEffect(() => {
               </div>
 
               <div className="mt-6 flex items-end gap-3">
-                <p className="text-3xl font-bold text-[#111]">${product.price}</p>
+                <p className="text-3xl font-bold text-[#111]">
+                  ${Number(product.price).toFixed(2)}
+                </p>
                 <span className="pb-1 text-sm text-gray-500">
                   Free shipping over $100
                 </span>
@@ -429,13 +493,14 @@ React.useEffect(() => {
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 rounded-full bg-[#111] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+                  className="flex-1 rounded-full bg-[#111] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-600"
                 >
                   Add to Cart
                 </button>
 
                 <button
                   type="button"
+                  onClick={handleBuyNow}
                   className="flex-1 rounded-full border border-black/10 bg-white px-6 py-3.5 text-sm font-semibold text-[#111] transition hover:border-indigo-600 hover:text-indigo-600"
                 >
                   Buy Now

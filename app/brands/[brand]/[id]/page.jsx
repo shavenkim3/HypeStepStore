@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import {
@@ -71,6 +71,8 @@ function ProductGallery({ product }) {
 
 export default function BrandProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const brand = Array.isArray(params.brand) ? params.brand[0] : params.brand;
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -85,7 +87,106 @@ export default function BrandProductDetailPage() {
       slugifyBrand(item.brand) === brand
   );
 
+  const initialSizeFromQuery = searchParams.get("size") || "";
+  const fromCart = searchParams.get("from") === "cart";
+
   const [selectedSize, setSelectedSize] = React.useState("");
+
+  React.useEffect(() => {
+    if (product?.sizes?.includes(initialSizeFromQuery)) {
+      setSelectedSize(initialSizeFromQuery);
+    } else {
+      setSelectedSize("");
+    }
+  }, [product, productId, initialSizeFromQuery]);
+
+  const createCartItem = () => {
+    if (!product || !selectedSize) return null;
+
+    const primaryImage =
+      Array.isArray(product.gallery) && product.gallery.length > 0
+        ? product.gallery[0]?.src || product.image
+        : product.image;
+
+    return {
+      cartId: `${product.id}-${selectedSize}`,
+      id: product.id,
+      brand: product.brand,
+      name: product.name,
+      price:
+        typeof product.price === "number"
+          ? product.price
+          : Number(String(product.price).replace(/[^0-9.]/g, "")) || 0,
+      image: primaryImage,
+      category: product.category,
+      color: product.color,
+      colors: product.colors,
+      gender: product.gender,
+      size: selectedSize,
+      quantity: 1,
+      brandSlug: brand,
+      source: "brand",
+      routePath: `/brands/${brand}/${product.id}`,
+    };
+  };
+
+  const handleAddToCart = () => {
+    if (!product || !selectedSize) {
+      alert("Please select a size first");
+      return;
+    }
+
+    const cartItem = createCartItem();
+    const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
+
+    const existingIndex = existingCart.findIndex(
+      (item) => item.id === cartItem.id && item.size === cartItem.size
+    );
+
+    let updatedCart = [...existingCart];
+
+    if (existingIndex !== -1) {
+      updatedCart[existingIndex] = {
+        ...updatedCart[existingIndex],
+        quantity: (updatedCart[existingIndex].quantity || 1) + 1,
+        brandSlug: brand,
+        source: "brand",
+        routePath: `/brands/${brand}/${product.id}`,
+      };
+    } else {
+      updatedCart.push(cartItem);
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event("cartUpdated"));
+    router.push("/cart");
+  };
+
+  const handleBuyNow = () => {
+    if (!product || !selectedSize) {
+      alert("Please select a size first");
+      return;
+    }
+
+    const checkoutItem = {
+      ...createCartItem(),
+      brandSlug: brand,
+      source: "brand",
+      routePath: `/brands/${brand}/${product.id}`,
+    };
+
+    localStorage.setItem("checkoutItems", JSON.stringify([checkoutItem]));
+    router.push("/checkout");
+  };
+
+  const handleBackLink = () => {
+    if (fromCart) {
+      router.push("/cart");
+      return;
+    }
+
+    router.push(`/brands/${brand}`);
+  };
 
   if (!product || !brandName) {
     return (
@@ -126,12 +227,15 @@ export default function BrandProductDetailPage() {
                 Home
               </Link>
               <span className="mx-2 text-gray-300">/</span>
-              <Link
-                href={`/brands/${brand}`}
+
+              <button
+                type="button"
+                onClick={handleBackLink}
                 className="transition hover:text-indigo-600"
               >
-                {brandName}
-              </Link>
+                {fromCart ? "Cart" : brandName}
+              </button>
+
               <span className="mx-2 text-gray-300">/</span>
               <span className="text-[#111]">{product.name}</span>
             </div>
@@ -167,7 +271,7 @@ export default function BrandProductDetailPage() {
 
                 <div className="mt-6 flex items-end gap-3">
                   <p className="text-3xl font-bold text-[#111]">
-                    ${product.price}
+                    ${Number(product.price).toFixed(2)}
                   </p>
                   <span className="pb-1 text-sm text-gray-500">
                     Free shipping over $100
@@ -221,6 +325,7 @@ export default function BrandProductDetailPage() {
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
+                    onClick={handleAddToCart}
                     className="flex-1 rounded-full bg-[#111] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-600"
                   >
                     Add to Cart
@@ -228,6 +333,7 @@ export default function BrandProductDetailPage() {
 
                   <button
                     type="button"
+                    onClick={handleBuyNow}
                     className="flex-1 rounded-full border border-black/10 bg-white px-6 py-3.5 text-sm font-semibold text-[#111] transition hover:border-indigo-600 hover:text-indigo-600"
                   >
                     Buy Now

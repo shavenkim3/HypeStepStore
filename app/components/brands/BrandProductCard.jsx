@@ -7,7 +7,6 @@ import { Heart } from "lucide-react";
 export default function BrandProductCard({
   product,
   brandSlug,
-  onAddToCart,
 }) {
   const [isFollowed, setIsFollowed] = React.useState(false);
 
@@ -103,26 +102,12 @@ export default function BrandProductCard({
         <div className="flex items-center justify-between">
           <p className="text-2xl font-bold text-[#111]">${product.price}</p>
 
-          <div className="flex gap-2">
-            <Link
-              href={detailHref}
-              className="rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-[#111] transition hover:bg-gray-100"
-            >
-              View
-            </Link>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onAddToCart?.(product);
-              }}
-              className="rounded-full bg-[#111] px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-600"
-            >
-              Add
-            </button>
-          </div>
+          <Link
+            href={detailHref}
+            className="rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-[#111] transition hover:bg-gray-100"
+          >
+            View
+          </Link>
         </div>
       </div>
     </div>

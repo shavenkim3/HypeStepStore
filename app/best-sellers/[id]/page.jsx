@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
@@ -80,14 +81,14 @@ const bestSellerProducts = [
     description:
       "A standout best seller featuring bold proportions, premium comfort, and modern styling for everyday rotation.",
     gallery: [
-      { src: "/images/Luka(1).png", alt:  ""},
-      { src: "/images/Luka(2).png", alt: "" },
-      { src: "/images/Luka(3).png", alt: "" },
-      { src: "/images/Luka(4).png", alt: "" },
+      { src: "/images/Luka(1).png", alt: "Luka 77 Chicago PF view 1" },
+      { src: "/images/Luka(2).png", alt: "Luka 77 Chicago PF view 2" },
+      { src: "/images/Luka(3).png", alt: "Luka 77 Chicago PF view 3" },
+      { src: "/images/Luka(4).png", alt: "Luka 77 Chicago PF view 4" },
     ],
     sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
   },
-{
+  {
     id: 5,
     brand: "Puma",
     name: "Puma Speedcat OG",
@@ -100,10 +101,10 @@ const bestSellerProducts = [
     description:
       "A standout best seller featuring bold proportions, premium comfort, and modern styling for everyday rotation.",
     gallery: [
-      { src: "/images/Speedcat(1).png", alt:  ""},
-      { src: "/images/Speedcat(2).png", alt: "" },
-      { src: "/images/Speedcat(3).png", alt: "" },
-      { src: "/images/Speedcat(4).png", alt: "" },
+      { src: "/images/Speedcat(1).png", alt: "Puma Speedcat OG view 1" },
+      { src: "/images/Speedcat(2).png", alt: "Puma Speedcat OG view 2" },
+      { src: "/images/Speedcat(3).png", alt: "Puma Speedcat OG view 3" },
+      { src: "/images/Speedcat(4).png", alt: "Puma Speedcat OG view 4" },
     ],
     sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
   },
@@ -155,7 +156,7 @@ function ProductGallery({ product }) {
         </div>
       </div>
 
-      <div className="order-1 lg:order-2 overflow-hidden rounded-[32px] border border-black/5 bg-white p-4 shadow-sm sm:p-5">
+      <div className="order-1 overflow-hidden rounded-[32px] border border-black/5 bg-white p-4 shadow-sm sm:p-5 lg:order-2">
         <div className="relative flex items-center justify-center rounded-[28px] bg-[#eef2f8] px-6 py-8 sm:px-8 sm:py-10 lg:min-h-[540px] lg:px-10 lg:py-12 xl:min-h-[600px]">
           {product.isBestSeller && (
             <span className="absolute left-5 top-5 rounded-full bg-[#111] px-3 py-1 text-xs font-semibold text-white">
@@ -175,23 +176,30 @@ function ProductGallery({ product }) {
 }
 
 export default function BestSellerDetailPage({ params }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const { id } = React.use(params);
   const productId = Number(id);
   const product = bestSellerProducts.find((item) => item.id === productId);
 
+  const initialSizeFromQuery = searchParams.get("size") || "";
+  const fromCart = searchParams.get("from") === "cart";
+
   const [selectedSize, setSelectedSize] = useState("");
 
   React.useEffect(() => {
-    setSelectedSize("");
-  }, [productId]);
-
-  const handleAddToCart = () => {
-    if (!product || !selectedSize) {
-      alert("Please select a size first");
-      return;
+    if (product?.sizes?.includes(initialSizeFromQuery)) {
+      setSelectedSize(initialSizeFromQuery);
+    } else {
+      setSelectedSize("");
     }
+  }, [productId, initialSizeFromQuery, product]);
 
-    const cartItem = {
+  const createCartItem = () => {
+    if (!product || !selectedSize) return null;
+
+    return {
       cartId: `${product.id}-${selectedSize}`,
       id: product.id,
       brand: product.brand,
@@ -200,24 +208,69 @@ export default function BestSellerDetailPage({ params }) {
       image: product.gallery?.[0]?.src || "",
       category: product.category,
       color: product.color,
+      colors: product.colors,
+      gender: product.gender,
       size: selectedSize,
       quantity: 1,
+      source: "best-sellers",
+      routePath: `/best-sellers/${product.id}`,
     };
+  };
 
+  const handleAddToCart = () => {
+    if (!product || !selectedSize) {
+      alert("Please select a size first");
+      return;
+    }
+
+    const cartItem = createCartItem();
     const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
 
     const existingIndex = existingCart.findIndex(
       (item) => item.id === cartItem.id && item.size === cartItem.size
     );
 
+    let updatedCart = [...existingCart];
+
     if (existingIndex !== -1) {
-      existingCart[existingIndex].quantity += 1;
+      updatedCart[existingIndex] = {
+        ...updatedCart[existingIndex],
+        quantity: (updatedCart[existingIndex].quantity || 1) + 1,
+        source: "best-sellers",
+        routePath: `/best-sellers/${product.id}`,
+      };
     } else {
-      existingCart.push(cartItem);
+      updatedCart.push(cartItem);
     }
 
-    localStorage.setItem("cartItems", JSON.stringify(existingCart));
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
     window.dispatchEvent(new Event("cartUpdated"));
+    router.push("/cart");
+  };
+
+  const handleBuyNow = () => {
+    if (!product || !selectedSize) {
+      alert("Please select a size first");
+      return;
+    }
+
+    const checkoutItem = {
+      ...createCartItem(),
+      source: "best-sellers",
+      routePath: `/best-sellers/${product.id}`,
+    };
+
+    localStorage.setItem("checkoutItems", JSON.stringify([checkoutItem]));
+    router.push("/checkout");
+  };
+
+  const handleBackLink = () => {
+    if (fromCart) {
+      router.push("/cart");
+      return;
+    }
+
+    router.push("/");
   };
 
   if (!product) {
@@ -250,9 +303,13 @@ export default function BestSellerDetailPage({ params }) {
       <section className="px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
         <div className="mx-auto max-w-[1450px]">
           <div className="mb-6 text-sm text-gray-500">
-            <Link href="/" className="transition hover:text-indigo-600">
-              Home
-            </Link>
+            <button
+              type="button"
+              onClick={handleBackLink}
+              className="transition hover:text-indigo-600"
+            >
+              {fromCart ? "Cart" : "Home"}
+            </button>
             <span className="mx-2 text-gray-300">/</span>
             <span className="text-[#111]">Best Sellers</span>
             <span className="mx-2 text-gray-300">/</span>
@@ -295,7 +352,9 @@ export default function BestSellerDetailPage({ params }) {
               </div>
 
               <div className="mt-6 flex items-end gap-3">
-                <p className="text-3xl font-bold text-[#111]">${product.price}</p>
+                <p className="text-3xl font-bold text-[#111]">
+                  ${Number(product.price).toFixed(2)}
+                </p>
                 <span className="pb-1 text-sm text-gray-500">
                   Free shipping over $100
                 </span>
@@ -347,13 +406,14 @@ export default function BestSellerDetailPage({ params }) {
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="flex-1 rounded-full bg-[#111] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+                  className="flex-1 rounded-full bg-[#111] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-600"
                 >
                   Add to Cart
                 </button>
 
                 <button
                   type="button"
+                  onClick={handleBuyNow}
                   className="flex-1 rounded-full border border-black/10 bg-white px-6 py-3.5 text-sm font-semibold text-[#111] transition hover:border-indigo-600 hover:text-indigo-600"
                 >
                   Buy Now

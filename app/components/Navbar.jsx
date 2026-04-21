@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -11,6 +11,8 @@ import {
   Menu,
   X,
   ChevronDown,
+  LogIn,
+  Settings,
 } from "lucide-react";
 
 const megaMenus = {
@@ -153,12 +155,35 @@ function MegaMenu({ type, onNavigate }) {
 export default function Navbar({ searchTerm = "", onSearchChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const pathname = usePathname();
+  const accountMenuRef = useRef(null);
 
   const closeAllMenus = () => {
     setIsOpen(false);
     setActiveMegaMenu(null);
+    setAccountMenuOpen(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(event.target)
+      ) {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    setAccountMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header
@@ -236,9 +261,48 @@ export default function Navbar({ searchTerm = "", onSearchChange }) {
             <Search size={18} className="text-gray-500" />
           </div>
 
-          <Link href="/account" className="transition hover:text-indigo-600">
-            <User size={24} />
-          </Link>
+          <div className="relative" ref={accountMenuRef}>
+            <button
+              type="button"
+              onClick={() => setAccountMenuOpen((prev) => !prev)}
+              className={`flex items-center gap-1 transition ${
+                accountMenuOpen ? "text-indigo-600" : "hover:text-indigo-600"
+              }`}
+            >
+              <User size={24} />
+              <ChevronDown size={16} />
+            </button>
+
+            {accountMenuOpen && (
+              <div className="absolute right-0 top-full z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-[0_18px_40px_rgba(0,0,0,0.12)]">
+                <div className="border-b border-black/5 px-4 py-3">
+                  <p className="text-sm font-semibold text-[#111]">Account</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Access your account options
+                  </p>
+                </div>
+
+                <div className="p-2">
+                  <Link
+                    href="/login"
+                    className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#111] transition hover:bg-[#f6f7fb] hover:text-indigo-600"
+                  >
+                    <LogIn size={18} />
+                    Sign In
+                  </Link>
+
+                  <Link
+                    href="/account"
+                    className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#111] transition hover:bg-[#f6f7fb] hover:text-indigo-600"
+                  >
+                    <Settings size={18} />
+                    Manage Account
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
           <Link href="/follow" className="transition hover:text-indigo-600">
             <Heart size={24} />
           </Link>
@@ -360,16 +424,48 @@ export default function Navbar({ searchTerm = "", onSearchChange }) {
               </NavLink>
             </nav>
 
-            <div className="mt-6 flex items-center gap-5 border-t border-black/10 pt-4">
-              <Link href="/account" onClick={closeAllMenus}>
-                <User size={22} />
-              </Link>
-              <Link href="/follow" onClick={closeAllMenus}>
-                <Heart size={22} />
-              </Link>
-              <Link href="/cart" onClick={closeAllMenus}>
-                <ShoppingCart size={22} />
-              </Link>
+            <div className="mt-6 border-t border-black/10 pt-4">
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-[#111]">Account</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/login"
+                  onClick={closeAllMenus}
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#111] transition hover:bg-[#f6f7fb] hover:text-indigo-600"
+                >
+                  <LogIn size={18} />
+                  Sign In
+                </Link>
+
+                <Link
+                  href="/account"
+                  onClick={closeAllMenus}
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#111] transition hover:bg-[#f6f7fb] hover:text-indigo-600"
+                >
+                  <Settings size={18} />
+                  Manage Account
+                </Link>
+
+                <Link
+                  href="/follow"
+                  onClick={closeAllMenus}
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#111] transition hover:bg-[#f6f7fb] hover:text-indigo-600"
+                >
+                  <Heart size={18} />
+                  Follow
+                </Link>
+
+                <Link
+                  href="/cart"
+                  onClick={closeAllMenus}
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#111] transition hover:bg-[#f6f7fb] hover:text-indigo-600"
+                >
+                  <ShoppingCart size={18} />
+                  Cart
+                </Link>
+              </div>
             </div>
           </div>
         </div>
