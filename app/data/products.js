@@ -660,7 +660,7 @@ export const allProducts = [
     sizes: ["39", "40", "41", "42", "43", "44"],
   },
   {
-    id: 22,
+    id: 23,
     brand: "Under Armour",
     name: "Curry Series 7",
     price: 186,

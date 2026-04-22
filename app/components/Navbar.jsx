@@ -13,6 +13,7 @@ import {
   ChevronDown,
   LogIn,
   Settings,
+  ArrowRight,
 } from "lucide-react";
 
 const megaMenus = {
@@ -37,6 +38,13 @@ const megaMenus = {
       { label: "Basketball", href: "/men/basketball" },
       { label: "Training and Gym", href: "/men/training-gym" },
     ],
+    shopCard: {
+      title: "Shop Men",
+      subtitle: "Lifestyle, running, football, and more",
+      href: "/men",
+      image: "/images/airforce1.png",
+      badge: "New Season",
+    },
   },
   women: {
     brands: [
@@ -58,6 +66,13 @@ const megaMenus = {
       { label: "Basketball", href: "/women/basketball" },
       { label: "Training and Gym", href: "/women/training-gym" },
     ],
+    shopCard: {
+      title: "Shop Women",
+      subtitle: "Discover versatile everyday pairs",
+      href: "/women",
+      image: "/NewArrivals/JordanPink(1).png",
+      badge: "Trending",
+    },
   },
 };
 
@@ -90,15 +105,53 @@ function NavLink({ href, children, className = "", onClick }) {
   );
 }
 
+function PromoCard({ card, onNavigate }) {
+  return (
+    <Link
+      href={card.href}
+      onClick={onNavigate}
+      className="group relative flex min-h-[210px] overflow-hidden rounded-[28px] border border-black/5 bg-gradient-to-br from-[#f7f8fc] to-[#eef2f8] p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]"
+    >
+      <div className="relative z-10 flex max-w-[58%] flex-col">
+        <span className="inline-flex w-fit rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-indigo-600 shadow-sm">
+          {card.badge}
+        </span>
+
+        <h3 className="mt-4 text-2xl font-bold leading-tight text-[#111]">
+          {card.title}
+        </h3>
+
+        <p className="mt-2 text-sm leading-6 text-gray-600">
+          {card.subtitle}
+        </p>
+
+        <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-[#111] transition group-hover:text-indigo-600">
+          Explore Now
+          <ArrowRight size={16} />
+        </span>
+      </div>
+
+      <div className="absolute bottom-0 right-0 flex h-full w-[52%] items-end justify-end">
+        <div className="absolute bottom-6 right-8 h-16 w-28 rounded-full bg-black/10 blur-2xl" />
+        <img
+          src={card.image}
+          alt={card.title}
+          className="relative z-10 h-[170px] w-auto max-w-[220px] object-contain transition duration-500 group-hover:scale-105"
+        />
+      </div>
+    </Link>
+  );
+}
+
 function MegaMenu({ type, onNavigate }) {
   const menu = megaMenus[type];
 
   return (
     <div className="absolute left-0 top-full z-50 w-full border-t border-black/10 bg-white shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
-      <div className="mx-auto grid max-w-[1500px] grid-cols-1 gap-0 md:grid-cols-[1.1fr_1.5fr_1.2fr_1.2fr]">
-        <div className="border-r border-black/5 px-6 py-6 lg:px-8">
-          <h3 className="mb-3 text-xl font-semibold text-[#111]">Brands</h3>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+      <div className="mx-auto grid max-w-[1500px] grid-cols-1 md:grid-cols-[1fr_1.15fr_1.25fr]">
+        <div className="border-r border-black/5 px-6 py-7 lg:px-8">
+          <h3 className="mb-4 text-2xl font-bold text-[#111]">Brands</h3>
+          <div className="grid grid-cols-2 gap-x-10 gap-y-2">
             {menu.brands.map((item) => (
               <Link
                 key={item.label}
@@ -112,9 +165,9 @@ function MegaMenu({ type, onNavigate }) {
           </div>
         </div>
 
-        <div className="border-r border-black/5 px-6 py-6 lg:px-8">
-          <h3 className="mb-3 text-xl font-semibold text-[#111]">Shoes</h3>
-          <div className="flex flex-col gap-1">
+        <div className="border-r border-black/5 px-6 py-7 lg:px-8">
+          <h3 className="mb-4 text-2xl font-bold text-[#111]">Shoes</h3>
+          <div className="flex flex-col gap-2">
             {menu.shoes.map((item) => (
               <Link
                 key={item.label}
@@ -128,26 +181,58 @@ function MegaMenu({ type, onNavigate }) {
           </div>
         </div>
 
-        <div className="px-4 py-4 lg:px-6 lg:py-5">
-          <Link
-            href={type === "men" ? "/men" : "/women"}
-            onClick={onNavigate}
-            className="flex h-full min-h-[132px] items-center justify-center rounded-2xl bg-[#d9d9d9] text-lg font-semibold text-gray-700 transition hover:bg-[#cfcfcf]"
-          >
-            Shop {type === "men" ? "Men" : "Women"}
-          </Link>
-        </div>
-
-        <div className="px-4 py-4 lg:px-6 lg:py-5">
-          <Link
-            href={type === "men" ? "/sale/men" : "/sale/women"}
-            onClick={onNavigate}
-            className="flex h-full min-h-[132px] items-center justify-center rounded-2xl bg-[#d9d9d9] text-lg font-semibold text-gray-700 transition hover:bg-[#cfcfcf]"
-          >
-            {type === "men" ? "Men's Sale" : "Women's Sale"}
-          </Link>
+        <div className="px-5 py-5 lg:px-6 lg:py-6">
+          <PromoCard card={menu.shopCard} onNavigate={onNavigate} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function DesktopMegaTrigger({
+  label,
+  href,
+  type,
+  pathname,
+  activeMegaMenu,
+  onOpen,
+  onClose,
+}) {
+  const isActive = pathname.startsWith(href) || activeMegaMenu === type;
+
+  return (
+    <div
+      className="relative flex items-center"
+      onMouseEnter={() => onOpen(type)}
+    >
+      <Link
+        href={href}
+        className={`transition ${
+          isActive ? "text-indigo-600" : "hover:text-indigo-600"
+        }`}
+      >
+        {label}
+      </Link>
+
+      <button
+        type="button"
+        aria-label={`Open ${label} menu`}
+        onMouseEnter={() => onOpen(type)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (activeMegaMenu === type) {
+            onClose();
+          } else {
+            onOpen(type);
+          }
+        }}
+        className={`ml-1 inline-flex items-center transition ${
+          isActive ? "text-indigo-600" : "hover:text-indigo-600"
+        }`}
+      >
+        <ChevronDown size={18} />
+      </button>
     </div>
   );
 }
@@ -183,6 +268,7 @@ export default function Navbar({ searchTerm = "", onSearchChange }) {
 
   useEffect(() => {
     setAccountMenuOpen(false);
+    setActiveMegaMenu(null);
   }, [pathname]);
 
   return (
@@ -205,37 +291,25 @@ export default function Navbar({ searchTerm = "", onSearchChange }) {
             </NavLink>
           ))}
 
-          <div
-            className="relative"
-            onMouseEnter={() => setActiveMegaMenu("men")}
-          >
-            <button
-              type="button"
-              className={`flex items-center gap-1 transition ${
-                pathname.startsWith("/men") || activeMegaMenu === "men"
-                  ? "text-indigo-600"
-                  : "hover:text-indigo-600"
-              }`}
-            >
-              Men <ChevronDown size={18} />
-            </button>
-          </div>
+          <DesktopMegaTrigger
+            label="Men"
+            href="/men"
+            type="men"
+            pathname={pathname}
+            activeMegaMenu={activeMegaMenu}
+            onOpen={setActiveMegaMenu}
+            onClose={() => setActiveMegaMenu(null)}
+          />
 
-          <div
-            className="relative"
-            onMouseEnter={() => setActiveMegaMenu("women")}
-          >
-            <button
-              type="button"
-              className={`flex items-center gap-1 transition ${
-                pathname.startsWith("/women") || activeMegaMenu === "women"
-                  ? "text-indigo-600"
-                  : "hover:text-indigo-600"
-              }`}
-            >
-              Women <ChevronDown size={18} />
-            </button>
-          </div>
+          <DesktopMegaTrigger
+            label="Women"
+            href="/women"
+            type="women"
+            pathname={pathname}
+            activeMegaMenu={activeMegaMenu}
+            onOpen={setActiveMegaMenu}
+            onClose={() => setActiveMegaMenu(null)}
+          />
 
           {mainNavLinks.slice(2).map((item) => (
             <NavLink

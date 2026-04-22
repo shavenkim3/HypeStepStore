@@ -3,112 +3,10 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import Link from "next/link";
-
-const bestSellerProducts = [
-  {
-    id: 1,
-    brand: "Jordan",
-    name: "Air Jordan 1 Low",
-    price: 115,
-    category: "Basketball",
-    gender: "Men",
-    color: "Red",
-    isBestSeller: true,
-    colors: 4,
-    description:
-      "A best-selling Jordan silhouette with iconic style, everyday comfort, and versatile wearability for both on-court and off-court looks.",
-    gallery: [
-      { src: "/images/jordan1(1).png", alt: "Air Jordan 1 Low side view" },
-      { src: "/images/jordan1(2).png", alt: "Air Jordan 1 Low front view" },
-      { src: "/images/jordan1(3).png", alt: "Air Jordan 1 Low back view" },
-      { src: "/images/jordan1(4).png", alt: "Air Jordan 1 Low top view" },
-    ],
-    sizes: ["39", "40", "41", "42", "43", "44", "45"],
-  },
-  {
-    id: 2,
-    brand: "Nike",
-    name: "Nike Air Force 1 '07",
-    price: 144,
-    category: "Lifestyle",
-    gender: "Men",
-    color: "White",
-    isBestSeller: true,
-    colors: 3,
-    description:
-      "One of the most popular sneakers of all time, combining timeless design, premium comfort, and effortless styling.",
-    gallery: [
-      { src: "/images/airforce1(1).png", alt: "Nike Air Force 1 '07 side view" },
-      { src: "/images/airforce1(2).png", alt: "Nike Air Force 1 '07 front view" },
-      { src: "/images/airforce1(3).png", alt: "Nike Air Force 1 '07 back view" },
-      { src: "/images/airforce1(4).png", alt: "Nike Air Force 1 '07 top view" },
-    ],
-    sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
-  },
-  {
-    id: 3,
-    brand: "Adidas",
-    name: "Adidas Samba OG",
-    price: 105,
-    category: "Lifestyle",
-    gender: "Unisex",
-    color: "White",
-    isBestSeller: true,
-    colors: 2,
-    description:
-      "A true best seller with retro football DNA, sleek proportions, and streetwear appeal that never goes out of style.",
-    gallery: [
-      { src: "/images/Samba(1).png", alt: "Adidas Samba OG side view" },
-      { src: "/images/Samba(2).png", alt: "Adidas Samba OG front view" },
-      { src: "/images/Samba(3).png", alt: "Adidas Samba OG back view" },
-      { src: "/images/Samba(4).png", alt: "Adidas Samba OG top view" },
-    ],
-    sizes: ["38", "39", "40", "41", "42", "43", "44"],
-  },
-  {
-    id: 4,
-    brand: "Nike",
-    name: "Luka 77 “Chicago” PF",
-    price: 116,
-    category: "Basketball",
-    gender: "Men",
-    color: "White",
-    isBestSeller: true,
-    colors: 1,
-    description:
-      "A standout best seller featuring bold proportions, premium comfort, and modern styling for everyday rotation.",
-    gallery: [
-      { src: "/images/Luka(1).png", alt: "Luka 77 Chicago PF view 1" },
-      { src: "/images/Luka(2).png", alt: "Luka 77 Chicago PF view 2" },
-      { src: "/images/Luka(3).png", alt: "Luka 77 Chicago PF view 3" },
-      { src: "/images/Luka(4).png", alt: "Luka 77 Chicago PF view 4" },
-    ],
-    sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
-  },
-  {
-    id: 5,
-    brand: "Puma",
-    name: "Puma Speedcat OG",
-    price: 119,
-    category: "Lifestyle",
-    gender: "Men",
-    color: "Brown",
-    isBestSeller: true,
-    colors: 1,
-    description:
-      "A standout best seller featuring bold proportions, premium comfort, and modern styling for everyday rotation.",
-    gallery: [
-      { src: "/images/Speedcat(1).png", alt: "Puma Speedcat OG view 1" },
-      { src: "/images/Speedcat(2).png", alt: "Puma Speedcat OG view 2" },
-      { src: "/images/Speedcat(3).png", alt: "Puma Speedcat OG view 3" },
-      { src: "/images/Speedcat(4).png", alt: "Puma Speedcat OG view 4" },
-    ],
-    sizes: ["38", "39", "40", "41", "42", "43", "44", "45"],
-  },
-];
+import { allProducts } from "../../data/products";
 
 function ProductGallery({ product }) {
   const gallery = useMemo(() => {
@@ -134,7 +32,7 @@ function ProductGallery({ product }) {
 
             return (
               <button
-                key={`${image.alt}-${index}`}
+                key={`${product.id}-${index}`}
                 type="button"
                 onClick={() => setSelectedImage(index)}
                 className={`overflow-hidden rounded-[24px] border bg-white p-2 shadow-sm transition ${
@@ -146,7 +44,7 @@ function ProductGallery({ product }) {
                 <div className="flex h-[84px] items-center justify-center rounded-[18px] bg-[#eef2f8] p-2 sm:h-[92px] lg:h-[100px]">
                   <img
                     src={image.src}
-                    alt={image.alt}
+                    alt={image.alt || product.name}
                     className="h-[58px] w-full max-w-[90px] object-contain sm:h-[66px] lg:h-[72px]"
                   />
                 </div>
@@ -181,7 +79,10 @@ export default function BestSellerDetailPage({ params }) {
 
   const { id } = React.use(params);
   const productId = Number(id);
-  const product = bestSellerProducts.find((item) => item.id === productId);
+
+  const product = allProducts.find(
+    (item) => item.id === productId && item.isBestSeller
+  );
 
   const initialSizeFromQuery = searchParams.get("size") || "";
   const fromCart = searchParams.get("from") === "cart";
@@ -207,9 +108,7 @@ export default function BestSellerDetailPage({ params }) {
     ? originalPriceFromQuery
     : Number(product?.price || 0);
 
-  const displayDiscountPercent = hasSalePrice
-    ? discountPercentFromQuery
-    : 0;
+  const displayDiscountPercent = hasSalePrice ? discountPercentFromQuery : 0;
 
   const [selectedSize, setSelectedSize] = useState("");
 
@@ -232,7 +131,7 @@ export default function BestSellerDetailPage({ params }) {
       price: displayPrice,
       originalPrice: hasSalePrice ? displayOriginalPrice : undefined,
       discountPercent: hasSalePrice ? displayDiscountPercent : undefined,
-      image: product.gallery?.[0]?.src || "",
+      image: product.gallery?.[0]?.src || product.image || "",
       category: product.category,
       color: product.color,
       colors: product.colors,
@@ -429,7 +328,7 @@ export default function BestSellerDetailPage({ params }) {
 
                     return (
                       <button
-                        key={size}
+                        key={`${product.id}-${size}`}
                         type="button"
                         onClick={() => setSelectedSize(size)}
                         className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
