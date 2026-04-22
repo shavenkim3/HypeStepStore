@@ -89,6 +89,31 @@ export default function BrandProductDetailPage() {
 
   const initialSizeFromQuery = searchParams.get("size") || "";
   const fromCart = searchParams.get("from") === "cart";
+  const fromSale = searchParams.get("from") === "sale";
+  const saleEnabled = searchParams.get("sale") === "1";
+
+  const salePriceFromQuery = Number(searchParams.get("salePrice"));
+  const originalPriceFromQuery = Number(searchParams.get("originalPrice"));
+  const discountPercentFromQuery = Number(searchParams.get("discount"));
+
+  const hasSalePrice =
+    saleEnabled &&
+    Number.isFinite(salePriceFromQuery) &&
+    salePriceFromQuery > 0 &&
+    Number.isFinite(originalPriceFromQuery) &&
+    originalPriceFromQuery > 0;
+
+  const displayPrice = hasSalePrice
+    ? salePriceFromQuery
+    : Number(product?.price || 0);
+
+  const displayOriginalPrice = hasSalePrice
+    ? originalPriceFromQuery
+    : Number(product?.price || 0);
+
+  const displayDiscountPercent = hasSalePrice
+    ? discountPercentFromQuery
+    : 0;
 
   const [selectedSize, setSelectedSize] = React.useState("");
 
@@ -113,10 +138,9 @@ export default function BrandProductDetailPage() {
       id: product.id,
       brand: product.brand,
       name: product.name,
-      price:
-        typeof product.price === "number"
-          ? product.price
-          : Number(String(product.price).replace(/[^0-9.]/g, "")) || 0,
+      price: displayPrice,
+      originalPrice: hasSalePrice ? displayOriginalPrice : undefined,
+      discountPercent: hasSalePrice ? displayDiscountPercent : undefined,
       image: primaryImage,
       category: product.category,
       color: product.color,
@@ -149,6 +173,9 @@ export default function BrandProductDetailPage() {
       updatedCart[existingIndex] = {
         ...updatedCart[existingIndex],
         quantity: (updatedCart[existingIndex].quantity || 1) + 1,
+        price: displayPrice,
+        originalPrice: hasSalePrice ? displayOriginalPrice : undefined,
+        discountPercent: hasSalePrice ? displayDiscountPercent : undefined,
         brandSlug: brand,
         source: "brand",
         routePath: `/brands/${brand}/${product.id}`,
@@ -168,13 +195,7 @@ export default function BrandProductDetailPage() {
       return;
     }
 
-    const checkoutItem = {
-      ...createCartItem(),
-      brandSlug: brand,
-      source: "brand",
-      routePath: `/brands/${brand}/${product.id}`,
-    };
-
+    const checkoutItem = createCartItem();
     localStorage.setItem("checkoutItems", JSON.stringify([checkoutItem]));
     router.push("/checkout");
   };
@@ -182,6 +203,11 @@ export default function BrandProductDetailPage() {
   const handleBackLink = () => {
     if (fromCart) {
       router.push("/cart");
+      return;
+    }
+
+    if (fromSale) {
+      router.push("/sale");
       return;
     }
 
@@ -233,7 +259,7 @@ export default function BrandProductDetailPage() {
                 onClick={handleBackLink}
                 className="transition hover:text-indigo-600"
               >
-                {fromCart ? "Cart" : brandName}
+                {fromCart ? "Cart" : fromSale ? "Sale" : brandName}
               </button>
 
               <span className="mx-2 text-gray-300">/</span>
@@ -244,15 +270,21 @@ export default function BrandProductDetailPage() {
               <ProductGallery product={product} />
 
               <div className="rounded-[32px] border border-black/5 bg-white p-6 shadow-sm sm:p-8">
-                <div>
+                <div className="flex flex-wrap items-center gap-3">
                   <p className="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">
                     {product.brand}
                   </p>
 
-                  <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
-                    {product.name}
-                  </h1>
+                  {hasSalePrice && (
+                    <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">
+                      -{displayDiscountPercent}% Sale
+                    </span>
+                  )}
                 </div>
+
+                <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
+                  {product.name}
+                </h1>
 
                 <div className="mt-5 flex flex-wrap gap-3 text-sm text-gray-600">
                   <span className="rounded-full bg-[#f6f7fb] px-4 py-2">
@@ -269,10 +301,17 @@ export default function BrandProductDetailPage() {
                   </span>
                 </div>
 
-                <div className="mt-6 flex items-end gap-3">
+                <div className="mt-6 flex flex-wrap items-end gap-3">
                   <p className="text-3xl font-bold text-[#111]">
-                    ${Number(product.price).toFixed(2)}
+                    ${Number(displayPrice).toFixed(2)}
                   </p>
+
+                  {hasSalePrice && (
+                    <p className="pb-1 text-base font-medium text-gray-400 line-through">
+                      ${Number(displayOriginalPrice).toFixed(2)}
+                    </p>
+                  )}
+
                   <span className="pb-1 text-sm text-gray-500">
                     Free shipping over $100
                   </span>

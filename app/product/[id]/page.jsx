@@ -265,6 +265,31 @@ export default function ProductDetailPage({ params }) {
 
   const initialSizeFromQuery = searchParams.get("size") || "";
   const fromCart = searchParams.get("from") === "cart";
+  const fromSale = searchParams.get("from") === "sale";
+  const saleEnabled = searchParams.get("sale") === "1";
+
+  const salePriceFromQuery = Number(searchParams.get("salePrice"));
+  const originalPriceFromQuery = Number(searchParams.get("originalPrice"));
+  const discountPercentFromQuery = Number(searchParams.get("discount"));
+
+  const hasSalePrice =
+    saleEnabled &&
+    Number.isFinite(salePriceFromQuery) &&
+    salePriceFromQuery > 0 &&
+    Number.isFinite(originalPriceFromQuery) &&
+    originalPriceFromQuery > 0;
+
+  const displayPrice = hasSalePrice
+    ? salePriceFromQuery
+    : Number(product?.price || 0);
+
+  const displayOriginalPrice = hasSalePrice
+    ? originalPriceFromQuery
+    : Number(product?.price || 0);
+
+  const displayDiscountPercent = hasSalePrice
+    ? discountPercentFromQuery
+    : 0;
 
   const [selectedSize, setSelectedSize] = useState("");
 
@@ -284,10 +309,9 @@ export default function ProductDetailPage({ params }) {
       id: product.id,
       brand: product.brand,
       name: product.name,
-      price:
-        typeof product.price === "number"
-          ? product.price
-          : Number(String(product.price).replace(/[^0-9.]/g, "")) || 0,
+      price: displayPrice,
+      originalPrice: hasSalePrice ? displayOriginalPrice : undefined,
+      discountPercent: hasSalePrice ? displayDiscountPercent : undefined,
       image: product.gallery?.[0]?.src || "",
       category: product.category,
       color: product.color,
@@ -319,6 +343,9 @@ export default function ProductDetailPage({ params }) {
       updatedCart[existingIndex] = {
         ...updatedCart[existingIndex],
         quantity: (updatedCart[existingIndex].quantity || 1) + 1,
+        price: displayPrice,
+        originalPrice: hasSalePrice ? displayOriginalPrice : undefined,
+        discountPercent: hasSalePrice ? displayDiscountPercent : undefined,
         source: "product",
         routePath: `/product/${product.id}`,
       };
@@ -337,12 +364,7 @@ export default function ProductDetailPage({ params }) {
       return;
     }
 
-    const checkoutItem = {
-      ...createCartItem(),
-      source: "product",
-      routePath: `/product/${product.id}`,
-    };
-
+    const checkoutItem = createCartItem();
     localStorage.setItem("checkoutItems", JSON.stringify([checkoutItem]));
     router.push("/checkout");
   };
@@ -350,6 +372,11 @@ export default function ProductDetailPage({ params }) {
   const handleBackLink = () => {
     if (fromCart) {
       router.push("/cart");
+      return;
+    }
+
+    if (fromSale) {
+      router.push("/sale");
       return;
     }
 
@@ -396,7 +423,7 @@ export default function ProductDetailPage({ params }) {
               onClick={handleBackLink}
               className="transition hover:text-indigo-600"
             >
-              {fromCart ? "Cart" : "New Arrivals"}
+              {fromCart ? "Cart" : fromSale ? "Sale" : "New Arrivals"}
             </button>
 
             <span className="mx-2 text-gray-300">/</span>
@@ -415,6 +442,12 @@ export default function ProductDetailPage({ params }) {
                 {product.isNew && (
                   <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
                     New Arrival
+                  </span>
+                )}
+
+                {hasSalePrice && (
+                  <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">
+                    -{displayDiscountPercent}% Sale
                   </span>
                 )}
               </div>
@@ -438,10 +471,17 @@ export default function ProductDetailPage({ params }) {
                 </span>
               </div>
 
-              <div className="mt-6 flex items-end gap-3">
+              <div className="mt-6 flex flex-wrap items-end gap-3">
                 <p className="text-3xl font-bold text-[#111]">
-                  ${Number(product.price).toFixed(2)}
+                  ${Number(displayPrice).toFixed(2)}
                 </p>
+
+                {hasSalePrice && (
+                  <p className="pb-1 text-base font-medium text-gray-400 line-through">
+                    ${Number(displayOriginalPrice).toFixed(2)}
+                  </p>
+                )}
+
                 <span className="pb-1 text-sm text-gray-500">
                   Free shipping over $100
                 </span>

@@ -21,28 +21,42 @@ function slugifyBrand(name) {
 }
 
 function getProductHref(item) {
-  const query = item?.size
-    ? `?size=${encodeURIComponent(item.size)}&from=cart`
-    : "?from=cart";
+  let basePath = item?.routePath;
 
-  if (item?.routePath) {
-    return `${item.routePath}${query}`;
+  if (!basePath) {
+    if (item?.source === "brand" && (item?.brandSlug || item?.brand)) {
+      const brandSlug = item.brandSlug || slugifyBrand(item.brand);
+      basePath = `/brands/${brandSlug}/${item.id}`;
+    } else if (item?.source === "best-sellers") {
+      basePath = `/best-sellers/${item.id}`;
+    } else {
+      basePath = `/product/${item.id}`;
+    }
   }
 
-  if (item?.source === "brand" && (item?.brandSlug || item?.brand)) {
-    const brandSlug = item.brandSlug || slugifyBrand(item.brand);
-    return `/brands/${brandSlug}/${item.id}${query}`;
+  const params = new URLSearchParams();
+
+  if (item?.size) {
+    params.set("size", item.size);
   }
 
-  if (item?.source === "best-sellers") {
-    return `/best-sellers/${item.id}${query}`;
+  params.set("from", "cart");
+
+  if (
+    Number.isFinite(Number(item?.discountPercent)) &&
+    Number(item.discountPercent) > 0 &&
+    Number.isFinite(Number(item?.originalPrice)) &&
+    Number(item.originalPrice) > 0 &&
+    Number.isFinite(Number(item?.price)) &&
+    Number(item.price) > 0
+  ) {
+    params.set("sale", "1");
+    params.set("salePrice", String(Number(item.price)));
+    params.set("originalPrice", String(Number(item.originalPrice)));
+    params.set("discount", String(Number(item.discountPercent)));
   }
 
-  if (item?.source === "product") {
-    return `/product/${item.id}${query}`;
-  }
-
-  return `/product/${item.id}${query}`;
+  return `${basePath}?${params.toString()}`;
 }
 
 export default function CartPage() {
@@ -59,6 +73,17 @@ export default function CartPage() {
             typeof item.price === "number"
               ? item.price
               : Number(String(item.price).replace(/[^0-9.]/g, "")) || 0,
+          originalPrice:
+            typeof item.originalPrice === "number"
+              ? item.originalPrice
+              : Number(String(item.originalPrice || "").replace(/[^0-9.]/g, "")) ||
+                undefined,
+          discountPercent:
+            typeof item.discountPercent === "number"
+              ? item.discountPercent
+              : Number(
+                  String(item.discountPercent || "").replace(/[^0-9.]/g, "")
+                ) || undefined,
         }))
       : [];
 
@@ -145,6 +170,11 @@ export default function CartPage() {
               <div className="space-y-5">
                 {cartItems.map((item) => {
                   const productHref = getProductHref(item);
+                  const hasSale =
+                    Number.isFinite(Number(item.discountPercent)) &&
+                    Number(item.discountPercent) > 0 &&
+                    Number.isFinite(Number(item.originalPrice)) &&
+                    Number(item.originalPrice) > 0;
 
                   return (
                     <div
@@ -166,9 +196,17 @@ export default function CartPage() {
                         <div className="flex min-w-0 flex-1 flex-col">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs font-medium uppercase tracking-[0.22em] text-indigo-500">
-                                {item.brand}
-                              </p>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-xs font-medium uppercase tracking-[0.22em] text-indigo-500">
+                                  {item.brand}
+                                </p>
+
+                                {hasSale ? (
+                                  <span className="rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-600">
+                                    -{Number(item.discountPercent)}% Sale
+                                  </span>
+                                ) : null}
+                              </div>
 
                               <h2 className="mt-2 text-lg font-semibold leading-snug text-[#111] sm:text-xl">
                                 {item.name}
@@ -204,9 +242,17 @@ export default function CartPage() {
                             <div className="flex items-start gap-3 sm:ml-4">
                               <div className="sm:text-right">
                                 <p className="text-sm text-gray-500">Unit Price</p>
-                                <p className="mt-1 text-2xl font-bold text-[#111]">
-                                  ${Number(item.price).toFixed(2)}
-                                </p>
+                                <div className="mt-1 flex flex-col items-start sm:items-end">
+                                  <p className="text-2xl font-bold text-[#111]">
+                                    ${Number(item.price).toFixed(2)}
+                                  </p>
+
+                                  {hasSale ? (
+                                    <p className="text-sm font-medium text-gray-400 line-through">
+                                      ${Number(item.originalPrice).toFixed(2)}
+                                    </p>
+                                  ) : null}
+                                </div>
                               </div>
 
                               <Link

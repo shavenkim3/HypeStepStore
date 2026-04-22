@@ -244,7 +244,6 @@ export default function Navbar({ searchTerm = "", onSearchChange }) {
               className="flex items-center gap-1"
             >
               {item.label}
-              {item.label === "Brands" ? <ChevronDown size={18} /> : null}
             </NavLink>
           ))}
         </nav>
